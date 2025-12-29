@@ -1,8 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 
 import useVersion, { versions } from "../../hooks/useVersion";
 
 import { VersionSelectorWrapper } from "./VersionSelector.style";
+
+type DropdownDirection = "down" | "up";
 
 const VersionSelector = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -10,31 +17,59 @@ const VersionSelector = () => {
   const { version, toggleVersion } = useVersion();
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [dropdownDirection, setDropdownDirection] =
+    useState<DropdownDirection>("down");
 
   useEffect(() => {
-    window.addEventListener("click", (e) => {
+    const handleClickOutside = (e: Event) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(e.target as Node)
       ) {
         setIsOpen(false);
       }
-    });
-
-    return () => {
-      window.removeEventListener("click", () => setIsOpen(false));
     };
-  }, [isOpen]);
+
+    window.addEventListener("click", handleClickOutside);
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
+  const determineDirection = (): DropdownDirection => {
+    if (typeof window === "undefined" || !dropdownRef.current) {
+      return "down";
+    }
+
+    const rect = dropdownRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const THRESHOLD = 180;
+
+    if (spaceBelow < THRESHOLD && spaceAbove > THRESHOLD) {
+      return "up";
+    }
+
+    return "down";
+  };
+
+  const handleToggle = (e: ReactMouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    if (!isOpen) {
+      setDropdownDirection(determineDirection());
+    }
+    setIsOpen((prev) => !prev);
+  };
 
   return (
-    <VersionSelectorWrapper ref={dropdownRef}>
+    <VersionSelectorWrapper
+      ref={dropdownRef}
+      data-direction={dropdownDirection}
+    >
       <button
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(!isOpen);
-        }}
+        onClick={handleToggle}
         className="version-selector"
       >
         v{version}
@@ -48,10 +83,8 @@ const VersionSelector = () => {
               onClick={() => {
                 if (version !== v) {
                   toggleVersion(v);
-                  setIsOpen(false);
-                } else {
-                  setIsOpen(false);
                 }
+                setIsOpen(false);
               }}
             >
               v{v}

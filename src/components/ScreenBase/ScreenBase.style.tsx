@@ -36,6 +36,13 @@ export const ScreenBaseWrapper = styled.section`
     background-color: transparent;
   }
 
+  @media (max-width: 768px) {
+    .content {
+      left: 0;
+      width: 100vw;
+    }
+  }
+
   p {
     margin: 0;
     padding: 0;

@@ -80,4 +80,11 @@ export const LanguageSelectorWrapper = styled.div`
       }
     }
   }
+
+  &[data-direction="up"] .dropdown {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 2px;
+  }
 `;
