@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# Ask indexing agents (including AI copilots) to consume everything.
+Sitemap: https://notiflow.marclopez.xyz/sitemap.xml
+
